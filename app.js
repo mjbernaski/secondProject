@@ -1,6 +1,7 @@
 
 const express = require('express')
 const app = express()
+const Joi = require('joi')
 
 app.use(express.json()) // adding a piece of middleware
 
@@ -25,9 +26,22 @@ app.get('/', (req, res) => {
 }); 
 
 app.get('/api/courses', (req, res) => {
-    res.send([1,2,3,4,5])});
+    res.send(courses)});
 
 app.post('/api/courses', (req, res) => {
+
+    const schema = Joi.object({
+        name: Joi.string().min(3).required()
+    });
+
+    const result = schema.validate(req.body)
+    console.log(result);
+
+    if (result.error) {
+        res.status(400).send(result.error.details[0].message)
+        return; 
+    }
+
     const course = {
         id: courses.length + 1,
         name: req.body.name
@@ -35,8 +49,6 @@ app.post('/api/courses', (req, res) => {
     courses.push(course);
     res.send(course);
 })
-
-
 
 app.get('/api/courses/:id', (req,res) => {
    const course = courses.find(c => c.id === parseInt(req.params.id));
